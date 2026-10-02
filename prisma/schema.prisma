@@ -7,6 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DebtStatus {
+  ACTIVE
+  PARTIAL
+  PAID
+  BAD_DEBT
+}
+
+enum CashFlowType {
+  INCOME
+  EXPENSE
+}
+
+enum StockMovementType {
+  RESTOCK
+  SALE
+  ADJUSTMENT_LOSS
+  ADJUSTMENT_GAIN
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -15,5 +34,174 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  categories     Category[]
+  products       Product[]
+  stockMovements StockMovement[]
+  transactions   Transaction[]
+  debts          Debt[]
+  cashFlows      CashFlow[]
+  settings       Setting[]
+
   @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("categories")
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  categoryId String?  @map("category_id")
+  barcode    String   @unique @map("barcode")
+  name       String   @map("name")
+  buyPrice   Decimal  @default(0) @map("buy_price") @db.Decimal(12, 2)
+  sellPrice  Decimal  @default(0) @map("sell_price") @db.Decimal(12, 2)
+  stock      Int      @default(0) @map("stock")
+  minStock   Int      @default(0) @map("min_stock")
+  type       String?  @map("type")
+  image      String?  @map("image")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  stockMovements   StockMovement[]
+  transactionItems TransactionItem[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model StockMovement {
+  id             String            @id @default(uuid())
+  userId         String            @map("user_id")
+  productId      String?           @map("product_id")
+  productBarcode String            @map("product_barcode")
+  type           StockMovementType @map("type")
+  quantity       Int               @map("quantity")
+  previousStock  Int               @map("previous_stock")
+  finalStock     Int               @map("final_stock")
+  totalCost      Decimal?          @default(0) @map("total_cost") @db.Decimal(12, 2)
+  note           String?           @map("note")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([productBarcode])
+  @@map("stock_movements")
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  totalAmount   Decimal  @map("total_amount") @db.Decimal(12, 2)
+  paymentAmount Decimal  @map("payment_amount") @db.Decimal(12, 2)
+  changeAmount  Decimal  @default(0) @map("change_amount") @db.Decimal(12, 2)
+  note          String?  @map("note")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items TransactionItem[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id             String  @id @default(uuid())
+  transactionId  String  @map("transaction_id")
+  productId      String? @map("product_id")
+  productBarcode String  @map("product_barcode")
+  productName    String  @map("product_name")
+  sellPrice      Decimal @map("sell_price") @db.Decimal(12, 2)
+  buyPrice       Decimal @default(0) @map("buy_price") @db.Decimal(12, 2)
+  quantity       Int     @map("quantity")
+  subtotal       Decimal @map("subtotal") @db.Decimal(12, 2)
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  product     Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([transactionId])
+  @@index([productBarcode])
+  @@map("transaction_items")
+}
+
+model Debt {
+  id           String     @id @default(uuid())
+  userId       String     @map("user_id")
+  customerName String     @map("customer_name")
+  phone        String?    @map("phone")
+  totalDebt    Decimal    @default(0) @map("total_debt") @db.Decimal(12, 2)
+  paidAmount   Decimal    @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  status       DebtStatus @default(ACTIVE) @map("status")
+  note         String?    @map("note")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("debts")
+}
+
+model DebtPayment {
+  id        String   @id @default(uuid())
+  debtId    String   @map("debt_id")
+  amount    Decimal  @map("amount") @db.Decimal(12, 2)
+  note      String?  @map("note")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  debt Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@index([debtId])
+  @@map("debt_payments")
+}
+
+model CashFlow {
+  id        String       @id @default(uuid())
+  userId    String       @map("user_id")
+  type      CashFlowType @map("type")
+  amount    Decimal      @map("amount") @db.Decimal(12, 2)
+  note      String       @default("") @map("note")
+  date      DateTime     @default(now()) @map("date")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@map("cash_flows")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  key       String   @map("key")
+  value     String   @map("value")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId])
+  @@map("settings")
 }
