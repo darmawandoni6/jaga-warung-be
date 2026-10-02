@@ -59,12 +59,27 @@ export const register = async (
 
   const hashedPassword = await bcrypt.hash(input.password, SALT_ROUNDS);
 
-  const newUser = await prisma.user.create({
-    data: {
-      email: input.email,
-      password: hashedPassword,
-      name: input.name ?? null,
-    },
+  const newUser = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email: input.email,
+        password: hashedPassword,
+        name: input.name ?? null,
+      },
+    });
+
+    // Seed default categories
+    const DEFAULT_CATEGORIES = ['Makanan', 'Minuman', 'Sembako', 'Rokok', 'Lainnya'];
+    for (const name of DEFAULT_CATEGORIES) {
+      await tx.category.create({
+        data: {
+          userId: user.id,
+          name,
+        },
+      });
+    }
+
+    return user;
   });
 
   const tokens = generateTokens({ id: newUser.id, email: newUser.email });
