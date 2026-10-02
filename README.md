@@ -13,6 +13,7 @@ Backend RESTful API service for the **Jaga Warung** platform, built with **TypeS
 - **Authentication**: JWT Dual-Token (Stateless Header + HttpOnly Cookie) + `bcrypt`
 - **Security**: `helmet`, `cors`, `cookie-parser`
 - **Validation**: [Zod 3.24](https://zod.dev/) (Request validation + Fail-fast Env config)
+- **Error Standardization**: [http-errors](https://github.com/jshttp/http-errors) (`createHttpError` + unified error middleware)
 - **Logging**: [Winston 3.17](https://github.com/winstonjs/winston) + [Morgan 1.10](https://github.com/expressjs/morgan)
 - **Containerization**: Podman (`podman-compose`) / Docker (`docker-compose`)
 
@@ -44,7 +45,7 @@ npm install
 cp .env.example .env
 ```
 
-_(Adjust secrets and database credentials in `.env` if necessary)_
+*(Adjust secrets and database credentials in `.env` if necessary)*
 
 ### 3. Start PostgreSQL Container
 
@@ -74,18 +75,55 @@ Healthcheck endpoint: **`http://localhost:3000/api-v1/health`**
 
 ## 🛠️ Available Scripts & Makefile Targets
 
-| Command            | Description                                            |
-| ------------------ | ------------------------------------------------------ |
-| `make dev`         | Start development server with hot-reload (`tsx watch`) |
-| `make build`       | Compile TypeScript to `dist/`                          |
-| `make start`       | Run compiled production build                          |
-| `make lint`        | Run ESLint check                                       |
-| `make format`      | Format codebase using Prettier                         |
-| `make db-up`       | Spin up PostgreSQL container                           |
-| `make db-down`     | Stop PostgreSQL container                              |
-| `make db-migrate`  | Apply Prisma schema migrations                         |
-| `make db-generate` | Re-generate Prisma Client types                        |
-| `make db-studio`   | Open Prisma Studio Web GUI (`http://localhost:5555`)   |
+| Command | Description |
+|---|---|
+| `make dev` | Start development server with hot-reload (`tsx watch`) |
+| `make build` | Compile TypeScript to `dist/` |
+| `make start` | Run compiled production build |
+| `make lint` | Run ESLint check |
+| `make format` | Format codebase using Prettier |
+| `make db-up` | Spin up PostgreSQL container |
+| `make db-down` | Stop PostgreSQL container |
+| `make db-migrate` | Apply Prisma schema migrations |
+| `make db-generate` | Re-generate Prisma Client types |
+| `make db-studio` | Open Prisma Studio Web GUI (`http://localhost:5555`) |
+
+---
+
+## 🚨 Error Handling & Standardization
+
+Errors across the service are standardized using **`http-errors`** and handled globally by `src/middlewares/error.middleware.ts`:
+
+```typescript
+import createHttpError from 'http-errors';
+// Or import helpers from '@/utils/errors':
+// import { NotFound, Unauthorized, Conflict } from '@/utils/errors';
+
+// Throw standard operational HTTP errors:
+throw createHttpError.NotFound('Product not found');         // 404
+throw createHttpError.Unauthorized('Invalid credentials');   // 401
+throw createHttpError.Conflict('Email already exists');       // 409
+throw createHttpError.Forbidden('Access denied');            // 403
+```
+
+All responses (success & error) return a consistent JSON schema:
+
+```json
+// Error Response
+{
+  "success": false,
+  "message": "Product not found"
+}
+
+// Validation Error (Zod)
+{
+  "success": false,
+  "message": "Validation error",
+  "errors": [
+    { "field": "body.email", "message": "Invalid email address" }
+  ]
+}
+```
 
 ---
 
@@ -93,14 +131,14 @@ Healthcheck endpoint: **`http://localhost:3000/api-v1/health`**
 
 All endpoints are versioned under `/api-v1`:
 
-| Method | Endpoint                |  Auth Required  | Description                                  |
-| ------ | ----------------------- | :-------------: | -------------------------------------------- |
-| `GET`  | `/api-v1/health`        |    ❌ Public    | Service health & uptime status               |
-| `POST` | `/api-v1/auth/register` |    ❌ Public    | Register a new user & set refresh cookie     |
-| `POST` | `/api-v1/auth/login`    |    ❌ Public    | Login & set refresh cookie                   |
-| `POST` | `/api-v1/auth/refresh`  |    🍪 Cookie    | Obtain new Access Token using refresh cookie |
-| `GET`  | `/api-v1/auth/me`       | 🔒 Bearer Token | Fetch authenticated user profile             |
-| `POST` | `/api-v1/auth/logout`   | 🔒 Bearer Token | Invalidate & clear refresh cookie            |
+| Method | Endpoint | Auth Required | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/health` | ❌ Public | Service health & uptime status |
+| `POST` | `/api-v1/auth/register` | ❌ Public | Register a new user & set refresh cookie |
+| `POST` | `/api-v1/auth/login` | ❌ Public | Login & set refresh cookie |
+| `POST` | `/api-v1/auth/refresh` | 🍪 Cookie | Obtain new Access Token using refresh cookie |
+| `GET` | `/api-v1/auth/me` | 🔒 Bearer Token | Fetch authenticated user profile |
+| `POST` | `/api-v1/auth/logout` | 🔒 Bearer Token | Invalidate & clear refresh cookie |
 
 ---
 
@@ -132,7 +170,7 @@ jaga-warung-be/
     ├── routes/             # API routes
     ├── schemas/            # Zod validation schemas
     ├── services/           # Business logic
-    └── utils/              # Response & formatting helpers
+    └── utils/              # Response, error, & formatting helpers
 ```
 
 ---
