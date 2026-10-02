@@ -4,6 +4,7 @@ import categoryRoutes from '@/routes/category.routes';
 import productRoutes from '@/routes/product.routes';
 import stockMovementRoutes from '@/routes/stock-movement.routes';
 import cashFlowRoutes from '@/routes/cash-flow.routes';
+import transactionRoutes from '@/routes/transaction.routes';
 import { successResponse } from '@/utils/response';
 
 const router = Router();
@@ -26,5 +27,6 @@ router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
 router.use('/stock-movements', stockMovementRoutes);
 router.use('/cash-flows', cashFlowRoutes);
+router.use('/transactions', transactionRoutes);
 
 export default router;
