@@ -1,0 +1,29 @@
+meta {
+  name: List Cash Flows
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/cash-flows
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~type: EXPENSE
+  ~startDate: 2026-10-01
+  ~endDate: 2026-10-31
+  ~limit: 50
+  ~offset: 0
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.cashFlows: isDefined
+}

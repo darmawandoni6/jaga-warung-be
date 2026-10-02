@@ -1,0 +1,30 @@
+meta {
+  name: Update Product
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/products/{{productId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Indomie Goreng Spesial Jumbo 120g",
+    "buyPrice": 3200,
+    "sellPrice": 4000,
+    "minStock": 15
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.product.sellPrice: eq 4000
+}

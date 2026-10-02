@@ -1,0 +1,30 @@
+meta {
+  name: Adjust Stock
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/stock-movements/adjust
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "productBarcode": "{{productBarcode}}",
+    "type": "ADJUSTMENT_LOSS",
+    "quantity": 2,
+    "reason": "Bungkus sobek digigit tikus gudang"
+  }
+}
+
+assert {
+  res.status: in [200, 201]
+  res.body.success: eq true
+  res.body.data.movement.type: eq ADJUSTMENT_LOSS
+}

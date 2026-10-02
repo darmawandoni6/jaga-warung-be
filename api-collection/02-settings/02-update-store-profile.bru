@@ -1,0 +1,30 @@
+meta {
+  name: Update Store Profile
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/settings/profile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Toko Kelontong Berkah Barokah",
+    "phone": "081234567890",
+    "address": "Jl. Raya Pasar Minggu No. 12, Jakarta Selatan",
+    "receiptFooter": "Terima kasih sudah berbelanja di Toko Berkah Barokah!"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.profile.name: eq Toko Kelontong Berkah Barokah
+}

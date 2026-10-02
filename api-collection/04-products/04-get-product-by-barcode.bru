@@ -1,0 +1,21 @@
+meta {
+  name: Get Product by Barcode
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/products/barcode/{{productBarcode}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.product.barcode: eq {{productBarcode}}
+}

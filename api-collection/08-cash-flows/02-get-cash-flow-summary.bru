@@ -1,0 +1,21 @@
+meta {
+  name: Get Cash Flow Summary
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/cash-flows/summary
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.summary: isDefined
+}

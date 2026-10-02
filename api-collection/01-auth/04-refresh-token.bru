@@ -1,0 +1,27 @@
+meta {
+  name: Refresh Access Token
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/auth/refresh
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+script:post-response {
+  if (res.body && res.body.data && res.body.data.accessToken) {
+    if (typeof bru.setEnvVar === 'function') {
+      bru.setEnvVar("token", res.body.data.accessToken);
+    }
+    if (typeof bru.setVar === 'function') {
+      bru.setVar("token", res.body.data.accessToken);
+    }
+  }
+}

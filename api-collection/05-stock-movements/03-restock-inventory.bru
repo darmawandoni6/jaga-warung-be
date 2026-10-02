@@ -1,0 +1,31 @@
+meta {
+  name: Restock Inventory
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/stock-movements/restock
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "productBarcode": "{{productBarcode}}",
+    "quantity": 40,
+    "buyPrice": 2900,
+    "recordToCashFlow": true,
+    "note": "Restok 1 Dus Indomie dari Agen Sumber Rejeki"
+  }
+}
+
+assert {
+  res.status: in [200, 201]
+  res.body.success: eq true
+  res.body.data.movement.type: eq RESTOCK
+}

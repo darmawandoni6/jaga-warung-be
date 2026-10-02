@@ -1,0 +1,28 @@
+meta {
+  name: Record Debt Payment
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/debts/{{debtId}}/payments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "amount": 25000,
+    "note": "Cicilan kasbon kedua via transfer QRIS"
+  }
+}
+
+assert {
+  res.status: in [200, 201]
+  res.body.success: eq true
+  res.body.data.debt: isDefined
+}

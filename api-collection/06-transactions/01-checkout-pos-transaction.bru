@@ -1,0 +1,46 @@
+meta {
+  name: Checkout POS Transaction
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/transactions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "items": [
+      {
+        "productBarcode": "{{productBarcode}}",
+        "quantity": 3,
+        "sellPrice": 3500
+      }
+    ],
+    "paymentAmount": 15000,
+    "note": "Pelanggan bayar tunai uang pas pecahan 15rb"
+  }
+}
+
+assert {
+  res.status: in [200, 201]
+  res.body.success: eq true
+  res.body.data.transaction: isDefined
+}
+
+script:post-response {
+  if (res.body && res.body.data && res.body.data.transaction) {
+    if (typeof bru.setEnvVar === 'function') {
+      bru.setEnvVar("transactionId", res.body.data.transaction.id);
+    }
+    if (typeof bru.setVar === 'function') {
+      bru.setVar("transactionId", res.body.data.transaction.id);
+    }
+  }
+}

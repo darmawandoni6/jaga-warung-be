@@ -1,0 +1,37 @@
+meta {
+  name: Create Category
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Sembako & Bumbu Dapur"
+  }
+}
+
+assert {
+  res.status: in [200, 201]
+  res.body.success: eq true
+}
+
+script:post-response {
+  if (res.body && res.body.data && res.body.data.category) {
+    if (typeof bru.setEnvVar === 'function') {
+      bru.setEnvVar("categoryId", res.body.data.category.id);
+    }
+    if (typeof bru.setVar === 'function') {
+      bru.setVar("categoryId", res.body.data.category.id);
+    }
+  }
+}

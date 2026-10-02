@@ -1,0 +1,27 @@
+meta {
+  name: Update Debt Status
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/debts/{{debtId}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "BAD_DEBT"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.debt.status: eq BAD_DEBT
+}

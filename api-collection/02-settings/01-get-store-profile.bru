@@ -1,0 +1,21 @@
+meta {
+  name: Get Store Profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/settings/profile
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data.profile: isDefined
+}
