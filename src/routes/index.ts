@@ -5,6 +5,7 @@ import productRoutes from '@/routes/product.routes';
 import stockMovementRoutes from '@/routes/stock-movement.routes';
 import cashFlowRoutes from '@/routes/cash-flow.routes';
 import transactionRoutes from '@/routes/transaction.routes';
+import debtRoutes from '@/routes/debt.routes';
 import { successResponse } from '@/utils/response';
 
 const router = Router();
@@ -28,5 +29,6 @@ router.use('/products', productRoutes);
 router.use('/stock-movements', stockMovementRoutes);
 router.use('/cash-flows', cashFlowRoutes);
 router.use('/transactions', transactionRoutes);
+router.use('/debts', debtRoutes);
 
 export default router;
