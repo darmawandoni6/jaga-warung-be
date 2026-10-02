@@ -131,14 +131,20 @@ All responses (success & error) return a consistent JSON schema:
 
 All endpoints are versioned under `/api-v1`:
 
-| Method | Endpoint | Auth Required | Description |
-|---|---|:---:|---|
-| `GET` | `/api-v1/health` | ❌ Public | Service health & uptime status |
-| `POST` | `/api-v1/auth/register` | ❌ Public | Register a new user & set refresh cookie |
-| `POST` | `/api-v1/auth/login` | ❌ Public | Login & set refresh cookie |
-| `POST` | `/api-v1/auth/refresh` | 🍪 Cookie | Obtain new Access Token using refresh cookie |
-| `GET` | `/api-v1/auth/me` | 🔒 Bearer Token | Fetch authenticated user profile |
-| `POST` | `/api-v1/auth/logout` | 🔒 Bearer Token | Invalidate & clear refresh cookie |
+| Module | Base Path | Key Endpoints & Actions |
+|---|---|---|
+| **Auth & Health** | `/api-v1/auth`, `/api-v1/health` | Register, Login, Refresh, Profile (`/me`), Logout, Healthcheck |
+| **Categories** | `/api-v1/categories` | List with product counts, Create, Get by ID, Update, Delete |
+| **Products** | `/api-v1/products` | Search, Barcode lookup (`/barcode/:code`), Create, Update, Delete |
+| **Stock Movements** | `/api-v1/stock-movements` | Restock inventory, Adjust stock (`/adjust`), History, Stats (`/stats`) |
+| **POS Transactions** | `/api-v1/transactions` | Atomic checkout POS (`POST /`), History with date filter, Receipts |
+| **Kasbon / Debts** | `/api-v1/debts` | Track customer debts, Installment payments (`/:id/payments`), Status (`/:id/status`) |
+| **Cash Flows** | `/api-v1/cash-flows` | Cash journal list, Net balance summary (`/summary`), Manual entries |
+| **Dashboard** | `/api-v1/dashboard` | Daily sales, Low stock alerts, Active debts, Today cash balance |
+| **Reports** | `/api-v1/reports/financial` | Period financial breakdown: Omset, HPP, Gross/Net Profit, Margin %, Top Products, Timeline |
+| **Store Settings** | `/api-v1/settings/profile` | Get & Update store profile (name, phone, address, receipt footer) |
+
+*For complete endpoint contracts and payloads, see [docs/api-conventions.md](docs/api-conventions.md).*
 
 ---
 

@@ -14,14 +14,79 @@ http://localhost:3000/api-v1/<resource>
 
 ### Endpoints Inventory
 
+#### 🔑 Authentication & Health
 | Method | Endpoint | Auth | Description |
 |---|---|:---:|---|
 | `GET` | `/api-v1/health` | ❌ Public | Service healthcheck & uptime |
-| `POST` | `/api-v1/auth/register` | ❌ Public | Register a new user & issue refresh cookie |
+| `POST` | `/api-v1/auth/register` | ❌ Public | Register user & seed default categories |
 | `POST` | `/api-v1/auth/login` | ❌ Public | Authenticate user & issue refresh cookie |
 | `POST` | `/api-v1/auth/refresh` | 🍪 Refresh Cookie | Issue new Access Token from refresh cookie |
-| `GET` | `/api-v1/auth/me` | 🔒 Bearer Token | Fetch authenticated user profile |
-| `POST` | `/api-v1/auth/logout` | 🔒 Bearer Token | Clear refresh token cookie |
+| `GET` | `/api-v1/auth/me` | 🔒 Bearer | Fetch authenticated user profile |
+| `POST` | `/api-v1/auth/logout` | 🔒 Bearer | Clear refresh token cookie |
+
+#### 🏷️ Categories (`/api-v1/categories`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/categories` | 🔒 Bearer | List categories with product counts |
+| `GET` | `/api-v1/categories/:id` | 🔒 Bearer | Get category detail |
+| `POST` | `/api-v1/categories` | 🔒 Bearer | Create new category |
+| `PUT` | `/api-v1/categories/:id` | 🔒 Bearer | Update category |
+| `DELETE` | `/api-v1/categories/:id` | 🔒 Bearer | Delete category |
+
+#### 📦 Products (`/api-v1/products`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/products` | 🔒 Bearer | List products (`search`, `categoryId`, `lowStock`) |
+| `GET` | `/api-v1/products/barcode/:barcode` | 🔒 Bearer | Lookup product by barcode (scanner) |
+| `GET` | `/api-v1/products/:id` | 🔒 Bearer | Get product detail |
+| `POST` | `/api-v1/products` | 🔒 Bearer | Create product (auto initial stock movement) |
+| `PUT` | `/api-v1/products/:id` | 🔒 Bearer | Update product |
+| `DELETE` | `/api-v1/products/:id` | 🔒 Bearer | Delete product |
+
+#### 🔄 Stock Movements (`/api-v1/stock-movements`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/stock-movements` | 🔒 Bearer | Query stock movement audit history |
+| `GET` | `/api-v1/stock-movements/stats` | 🔒 Bearer | Total restocked, sold, adjusted statistics |
+| `POST` | `/api-v1/stock-movements/restock` | 🔒 Bearer | Restock inventory & record cash flow expense |
+| `POST` | `/api-v1/stock-movements/adjust` | 🔒 Bearer | Adjust stock (`ADJUSTMENT_LOSS`/`GAIN`) |
+
+#### 🛒 POS Transactions (`/api-v1/transactions`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/transactions` | 🔒 Bearer | List transactions with date filter & pagination |
+| `GET` | `/api-v1/transactions/:id` | 🔒 Bearer | Get transaction receipt with line items |
+| `POST` | `/api-v1/transactions` | 🔒 Bearer | Checkout POS transaction (atomic stock & cash flow) |
+
+#### 📒 Debts / Kasbon (`/api-v1/debts`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/debts` | 🔒 Bearer | List customer debts (`status`, `search`) |
+| `GET` | `/api-v1/debts/:id` | 🔒 Bearer | Get debt detail with installment history |
+| `POST` | `/api-v1/debts` | 🔒 Bearer | Create new debt / kasbon |
+| `POST` | `/api-v1/debts/:id/payments` | 🔒 Bearer | Record installment payment (auto status & cash flow) |
+| `PATCH` | `/api-v1/debts/:id/status` | 🔒 Bearer | Update debt status (e.g. `BAD_DEBT`) |
+| `DELETE` | `/api-v1/debts/:id` | 🔒 Bearer | Delete debt record |
+
+#### 💵 Cash Flows (`/api-v1/cash-flows`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/cash-flows` | 🔒 Bearer | List cash journal entries (`type`, `startDate`, `endDate`) |
+| `GET` | `/api-v1/cash-flows/summary` | 🔒 Bearer | Get cash balance summary (Income, Expense, Balance) |
+| `POST` | `/api-v1/cash-flows` | 🔒 Bearer | Create manual cash flow entry |
+| `DELETE` | `/api-v1/cash-flows/:id` | 🔒 Bearer | Delete cash flow entry |
+
+#### 📊 Dashboard & Reports (`/api-v1/dashboard` & `/api-v1/reports`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/dashboard` | 🔒 Bearer | Daily sales summary, stock alerts, active debts |
+| `GET` | `/api-v1/reports/financial` | 🔒 Bearer | Financial report: Omset, HPP, Gross/Net Profit, Margin %, Top Products, Timeline |
+
+#### ⚙️ Settings (`/api-v1/settings`)
+| Method | Endpoint | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/api-v1/settings/profile` | 🔒 Bearer | Get store profile (name, phone, address, footer) |
+| `PUT` | `/api-v1/settings/profile` | 🔒 Bearer | Update store profile |
 
 ---
 

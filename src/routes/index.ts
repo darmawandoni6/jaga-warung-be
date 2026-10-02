@@ -7,6 +7,7 @@ import cashFlowRoutes from '@/routes/cash-flow.routes';
 import transactionRoutes from '@/routes/transaction.routes';
 import debtRoutes from '@/routes/debt.routes';
 import settingsRoutes from '@/routes/settings.routes';
+import { dashboardRouter, reportRouter } from '@/routes/report.routes';
 import { successResponse } from '@/utils/response';
 
 const router = Router();
@@ -32,5 +33,7 @@ router.use('/cash-flows', cashFlowRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/debts', debtRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/dashboard', dashboardRouter);
+router.use('/reports', reportRouter);
 
 export default router;
